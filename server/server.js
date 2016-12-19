@@ -3,12 +3,10 @@ import sockjs from 'sockjs';
 import redis from 'redis';
 import node_static from 'node-static';
 import jwt from 'jsonwebtoken';
-import config from '../../server/config';
+import config from './config';
 
 // Redis publisher
-const redisOptions = {
-  host: '91.121.95.35'
-}
+const redisOptions = {...config.redis}
 var redisClient = redis.createClient(redisOptions);
 var redisSubscriber = redis.createClient(redisOptions);
 
@@ -140,4 +138,4 @@ server.addListener('upgrade', function(req,res){
 socket.installHandlers(server, {prefix:'/socket'});
 
 console.log(' [*] Websocket server is Listening on 0.0.0.0:8500' );
-server.listen(8500, '0.0.0.0');
+server.listen(config.port, config.host);

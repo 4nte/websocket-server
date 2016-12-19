@@ -4,8 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "s": "cross-env BABEL_DISABLE_CACHE=1 NODE_ENV=development node index.js",
     "start": "cross-env BABEL_DISABLE_CACHE=1 NODE_ENV=development nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:prod": "cross-env NODE_ENV=production node index.js",
+    "bs": "npm run clean && npm run build && npm run start:prod",
+    "build": "cross-env NODE_ENV=production webpack --config webpack.config.server.js",
+    "clean": "rimraf dist",
+    "slate": "rimraf node_modules && npm install"
   },
   "author": "Ante Gulin",
   "license": "ISC",
@@ -17,9 +23,16 @@
     "sockjs": "^0.3.18"
   },
   "devDependencies": {
-    "babel-cli": "^6.18.0",
-    "babel-core": "^6.21.0",
-    "babel-loader": "^6.2.10",
-    "babel-preset-es2015": "^6.18.0"
+    "babel-eslint": "^6.0.4",
+    "babel-loader": "^6.2.4",
+    "babel-plugin-webpack-loaders": "^0.7.0",
+    "babel-polyfill": "^6.9.1",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-es2015-native-modules": "^6.6.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "babel-register": "^6.9.0",
+    "eslint": "^2.11.1",
+    "webpack": "2.1.0-beta.8",
+    "webpack-externals-plugin": "^1.0.0"
   }
 }
