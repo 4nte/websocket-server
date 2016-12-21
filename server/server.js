@@ -58,7 +58,7 @@ redisSubscriber.on("message", function(channel, event){
 
           // Send to browser if any addresses interescted
 
-          if(intersectedTags.length > 0 || event.address.include[conn.userId]){
+          if(intersectedTags.length > 0 || exclusive]){
             const browserEvent = {tags: intersectedTags, notification: eventPayload, exclusive};
             console.log('[Pushing to browser] ', browserEvent);
             conn.write(JSON.stringify(browserEvent));
