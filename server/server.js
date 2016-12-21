@@ -32,25 +32,36 @@ redisSubscriber.on("message", function(channel, event){
 
 
           let intersectedTags = [];
+          if(event.address.tags.length > 0 && subscriptions.length > 0){         
+            for(let tag in subscriptions){
+              tag = subscriptions[tag];
 
-          for(let tag in subscriptions){
-            tag = subscriptions[tag];
+              for(let _tag in event.address.tags){
+                _tag = event.address.tags[_tag];
 
-            for(let _tag in event.address.tags){
-              _tag = event.address.tags[_tag];
+                console.log(tag, '=?=', _tag);
+                if(tag == _tag)
+                  intersectedTags.push(tag);
 
-              console.log(tag, '=?=', _tag);
-              if(tag == _tag)
-                intersectedTags.push(tag);
+              }
+            }
+          }
 
+          let exclusive = false;
+          for(let userId in event.address.include){
+            userId = event.address.include[userId];
+            if(userId == conn.userId){
+              exclusive = true;
+              break;
             }
           }
 
           // Send to browser if any addresses interescted
-          if(intersectedTags.length > 0){
-            const event = {tags: intersectedTags, event: eventPayload}
-            console.log('[Pushing to browser] ', event);
-            conn.write(JSON.stringify(event));
+
+          if(intersectedTags.length > 0 || event.address.include[conn.userId]){
+            const browserEvent = {tags: intersectedTags, notification: eventPayload, exclusive};
+            console.log('[Pushing to browser] ', browserEvent);
+            conn.write(JSON.stringify(browserEvent));
           }
       })
     } 
@@ -58,10 +69,15 @@ redisSubscriber.on("message", function(channel, event){
 
 
 socket.on('connection', function(conn) {
+  if(conn === null){
+    console.log('Connection is NULL!');
+    return;
+  }
 
   let userId;
   // Save connection
   connections[conn.id] = conn;
+  conn.userId = null;
 
 	const connectionInfo = {
 		remoteAddress: conn.remoteAddress,
@@ -83,6 +99,7 @@ socket.on('connection', function(conn) {
         	return console.log('failed to verify JWT');
         }
         userId = decoded.sub;
+        conn.userId = decoded.sub;
         console.log('successfully decoded JWT. Userid:',userId);
         redisClient.SADD('user/'+userId+'/connections', conn.id );
 			});
