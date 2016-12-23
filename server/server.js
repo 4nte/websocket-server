@@ -24,7 +24,9 @@ redisSubscriber.on("message", function(channel, event){
     event = JSON.parse(event);
     const eventPayload = JSON.stringify(event.payload);
 
-    for(let conn in connections){
+    
+ 
+      for(let conn in connections){
       conn = connections[conn];
       redisClient.SMEMBERS('connection/'+conn.id+'/subscriptions', (err, subscriptions)=>{
         console.log('user subsriptions', subscriptions);
@@ -59,14 +61,22 @@ redisSubscriber.on("message", function(channel, event){
           // Send to browser if any addresses interescted
 
           if(intersectedTags.length > 0 || exclusive){
-            const browserEvent = {tags: intersectedTags, notification: eventPayload, exclusive};
-            console.log('[Pushing to browser] ', browserEvent);
-            conn.write(JSON.stringify(browserEvent));
-          }
-      })
-    } 
-});
 
+            //Check if excluded
+            if(event.address.exclude){
+              for(let exclude in event.address.exclude){
+                exclude = event.address.exclude[exclude];
+                if(exclude == conn.userId)
+                  return;
+              }
+              const browserEvent = {tags: intersectedTags, notification: eventPayload, exclusive};
+              console.log('[Pushing to browser] ', browserEvent);
+              conn.write(JSON.stringify(browserEvent));
+            }
+          }
+      });
+    }
+});
 
 socket.on('connection', function(conn) {
   if(conn === null){
